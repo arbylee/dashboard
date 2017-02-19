@@ -3,7 +3,8 @@ var jsonfile = require('jsonfile');
 var google = require('googleapis');
 var prompt = require('prompt');
 
-var secretsManager = require('./secrets-manager');
+var SecretsManager = require('./secrets-manager');
+var api_secrets_manager = SecretsManager('all_the_secrets');
 
 var app = express()
 var gmail = google.gmail('v1');
@@ -13,16 +14,15 @@ var scopes = [
   'https://www.googleapis.com/auth/gmail.readonly'
 ];
 
-var password;
 prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
-  var googleapi_secrets = secretsManager.read(result.password.trim(), 'google')
+  var password = result.password;
+
+  var googleapi_secrets = api_secrets_manager.read(result.password.trim(), 'google')
   var oauth2Client = new OAuth2(
     googleapi_secrets.client_id,
     googleapi_secrets.client_secret,
     googleapi_secrets.callback_url
   );
-
-  password = result.password;
 
   var url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
