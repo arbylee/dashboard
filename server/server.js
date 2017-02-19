@@ -1,10 +1,10 @@
 var express = require('express')
-var jsonfile = require('jsonfile');
 var google = require('googleapis');
 var prompt = require('prompt');
 
 var SecretsManager = require('./secrets-manager');
-var api_secrets_manager = SecretsManager('all_the_secrets');
+var apiSecretsManager = SecretsManager('all_the_secrets');
+var tokenSecretsManager = SecretsManager('all_the_tokens');
 
 var app = express()
 var gmail = google.gmail('v1');
@@ -17,7 +17,7 @@ var scopes = [
 prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
   var password = result.password;
 
-  var googleapi_secrets = api_secrets_manager.read(result.password.trim(), 'google')
+  var googleapi_secrets = apiSecretsManager.read(result.password.trim(), 'google')
   var oauth2Client = new OAuth2(
     googleapi_secrets.client_id,
     googleapi_secrets.client_secret,
@@ -30,18 +30,17 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
   });
 
   app.get('/auth', function(req, res) {
-    try {
-      var tokens = jsonfile.readFileSync('tokens.json');
-    } catch(e) {
-      console.log(e);
+    var google_token = tokenSecretsManager.read(password, 'google');
+
+    if (!google_token) {
       res.redirect(url);
     }
 
-    if (new Date(tokens.expiry_date) < new Date()) {
+    if (new Date(google_token.expiry_date) < new Date()) {
       res.redirect(url);
     }
 
-    oauth2Client.setCredentials(tokens);
+    oauth2Client.setCredentials(google_token);
     google.options({
         auth: oauth2Client
     });
@@ -52,9 +51,7 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
   app.get('/callback', function(req, res) {
     var code = req.query.code;
     oauth2Client.getToken(code, function (err, tokens) {
-      jsonfile.writeFile('tokens.json', tokens, function(error){
-        console.log(error);
-      })
+      tokenSecretsManager.save(password, 'google', tokens);
       if (!err) {
         oauth2Client.setCredentials(tokens);
       }

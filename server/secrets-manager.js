@@ -1,5 +1,4 @@
 var fs = require('fs');
-var prompt = require('prompt');
 var crypto = require('crypto');
 
 var SecretsManager = function(secrets_filename) {
@@ -18,18 +17,15 @@ var SecretsManager = function(secrets_filename) {
     return secrets;
   }
 
-  var store = function(password) {
-    prompt.start();
-    prompt.get(['name', 'client_id', 'client_secret', 'callback_url'], function (err, result) {
-      var secrets = getSecrets(password);
-      secrets[result.name] = result;
-      var encrypted_secrets = encrypt(password, JSON.stringify(secrets));
-      fs.writeFile(secrets_filename, encrypted_secrets, function(err) {
-        if(err) {
-            return console.log(err);
-        }
-        console.log("The file was saved!");
-      });
+  var save = function(password, name, data) {
+    var secrets = getSecrets(password);
+    secrets[name] = data;
+    var encrypted_secrets = encrypt(password, JSON.stringify(secrets));
+    fs.writeFile(secrets_filename, encrypted_secrets, function(err) {
+      if(err) {
+          return console.log(err);
+      }
+      console.log("The file was saved!");
     });
   }
 
@@ -55,7 +51,7 @@ var SecretsManager = function(secrets_filename) {
 
   return {
     read,
-    store
+    save
   }
 }
 

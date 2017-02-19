@@ -20,4 +20,4 @@ yarn-error.log*
 *.swo
 
 all_the_secrets
-tokens.json
+all_the_tokens
