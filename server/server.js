@@ -34,13 +34,23 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
 
     if (!google_token) {
       res.redirect(url);
-    }
-
-    if (new Date(google_token.expiry_date) < new Date()) {
-      res.redirect(url);
+      return;
     }
 
     oauth2Client.setCredentials(google_token);
+
+    if (new Date(google_token.expiry_date) < new Date()) {
+      if (google_token.refresh_token) {
+        oauth2Client.refreshAccessToken(function(err, tokens) {
+          console.log(err);
+          tokenSecretsManager.save(password, 'google', tokens);
+        });
+      } else {
+        res.redirect(url);
+        return;
+      }
+    }
+
     google.options({
         auth: oauth2Client
     });
@@ -51,10 +61,10 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
   app.get('/callback', function(req, res) {
     var code = req.query.code;
     oauth2Client.getToken(code, function (err, tokens) {
-      tokenSecretsManager.save(password, 'google', tokens);
       if (!err) {
         oauth2Client.setCredentials(tokens);
       }
+      tokenSecretsManager.save(password, 'google', tokens);
     });
     google.options({
         auth: oauth2Client
