@@ -65,9 +65,21 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
   app.get('/emails', function(req, res) {
     var params = {
       maxResults: 3,
-      userId: 'me'
+      userId: 'me',
+      q: req.query.q
     }
     gmail.users.messages.list(params, function(err, response) {
+      res.send(response);
+    })
+  })
+
+  app.get('/emails/:emailId', function (req, res) {
+    var params = {
+      id: req.params.emailId,
+      userId: 'me'
+    }
+
+    gmail.users.messages.get(params, function(err, response) {
       res.send(response);
     })
   })
