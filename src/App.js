@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
-import Tile from './Tile.js';
+import BoaBalance from './BoaBalance.js';
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <Tile />
+        <BoaBalance />
       </div>
     );
   }
