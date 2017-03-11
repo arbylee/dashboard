@@ -80,11 +80,38 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
     var params = {
       maxResults: 3,
       userId: 'me',
-      q: req.query.q
+      q: req.query.q,
     }
-    gmail.users.messages.list(params, function(err, response) {
-      res.send(response);
+    gmail.users.messages.list(params, function(err, listResponse) {
+      res.send(listResponse);
     })
+  })
+
+  app.get('/boa-balance', function(req, res) {
+    var params = {
+      userId: 'me',
+      labelIds: 'Label_70',
+    }
+    gmail.users.messages.list(params, function(err, listResponse) {
+      var messages = listResponse.messages;
+      var getParams = {
+        id: messages[0].id,
+        userId: 'me'
+      }
+
+      gmail.users.messages.get(getParams, function(err, getResponse) {
+        var balanceRegexp = new RegExp('Balance: \\\$ (.*) Account:')
+        var balanceMatch = getResponse.snippet.match(balanceRegexp);
+
+        var dateRegexp = new RegExp('Date: (.*) View');
+        var dateMatch = getResponse.snippet.match(dateRegexp);
+        var response = {
+          balance: balanceMatch[1],
+          date: dateMatch[1],
+        }
+        return res.send(response);
+      });
+    });
   })
 
   app.get('/emails/:emailId', function (req, res) {
