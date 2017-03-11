@@ -14,6 +14,8 @@ var scopes = [
   'https://www.googleapis.com/auth/gmail.readonly'
 ];
 
+const root = __dirname + '/../build';
+
 prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
   var password = result.password;
 
@@ -28,6 +30,8 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
     access_type: 'offline',
     scope: scopes,
   });
+
+  app.use('/', express.static(root));
 
   app.get('/auth', function(req, res) {
     var google_token = tokenSecretsManager.read(password, 'google');
