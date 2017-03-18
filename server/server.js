@@ -3,8 +3,6 @@ var google = require('googleapis');
 var prompt = require('prompt');
 
 var SecretsManager = require('./secrets-manager');
-var apiSecretsManager = SecretsManager('all_the_secrets');
-var tokenSecretsManager = SecretsManager('all_the_tokens');
 
 var app = express()
 var gmail = google.gmail('v1');
@@ -17,9 +15,11 @@ var scopes = [
 const root = __dirname + '/../build';
 
 prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
-  var password = result.password;
+  var password = result.password.trim();
+  var apiSecretsManager = SecretsManager(password, 'all_the_secrets');
+  var tokenSecretsManager = SecretsManager(password, 'all_the_tokens');
 
-  var googleapi_secrets = apiSecretsManager.read(result.password.trim(), 'google')
+  var googleapi_secrets = apiSecretsManager.read('google')
   var oauth2Client = new OAuth2(
     googleapi_secrets.client_id,
     googleapi_secrets.client_secret,
@@ -34,7 +34,7 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
   app.use('/', express.static(root));
 
   app.get('/auth', function(req, res) {
-    var google_token = tokenSecretsManager.read(password, 'google');
+    var google_token = tokenSecretsManager.read('google');
 
     if (!google_token) {
       res.redirect(url);
@@ -47,7 +47,7 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
       if (google_token.refresh_token) {
         oauth2Client.refreshAccessToken(function(err, tokens) {
           console.log(err);
-          tokenSecretsManager.save(password, 'google', tokens);
+          tokenSecretsManager.save('google', tokens);
         });
       } else {
         res.redirect(url);
@@ -68,7 +68,7 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
       if (!err) {
         oauth2Client.setCredentials(tokens);
       }
-      tokenSecretsManager.save(password, 'google', tokens);
+      tokenSecretsManager.save('google', tokens);
     });
     google.options({
         auth: oauth2Client

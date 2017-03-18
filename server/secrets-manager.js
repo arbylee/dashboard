@@ -1,15 +1,15 @@
 var fs = require('fs');
 var crypto = require('crypto');
 
-var SecretsManager = function(secrets_filename) {
+var SecretsManager = function(passw, secrets_filename) {
   var algorithm = 'aes-256-ctr';
-  var password;
+  var password = passw;
   var secrets;
 
-  var getSecrets = function(password) {
+  var getSecrets = function() {
     if (fs.existsSync(secrets_filename)) {
       encrypted_secrets = fs.readFileSync(secrets_filename, 'utf8');
-      secrets = JSON.parse(decrypt(password, encrypted_secrets));
+      secrets = JSON.parse(decrypt(encrypted_secrets));
     } else {
       secrets = {};
     }
@@ -17,10 +17,10 @@ var SecretsManager = function(secrets_filename) {
     return secrets;
   }
 
-  var save = function(password, name, data) {
-    var secrets = getSecrets(password);
+  var save = function(name, data) {
+    var secrets = getSecrets();
     secrets[name] = data;
-    var encrypted_secrets = encrypt(password, JSON.stringify(secrets));
+    var encrypted_secrets = encrypt(JSON.stringify(secrets));
     fs.writeFile(secrets_filename, encrypted_secrets, function(err) {
       if(err) {
           return console.log(err);
@@ -29,20 +29,20 @@ var SecretsManager = function(secrets_filename) {
     });
   }
 
-  var read = function(password, name) {
-    var secrets = getSecrets(password);
+  var read = function(name) {
+    var secrets = getSecrets();
     return secrets[name];
   }
 
   // Nodejs encryption with CTR
-  function encrypt(password, text){
+  function encrypt(text){
     var cipher = crypto.createCipher(algorithm,password)
     var crypted = cipher.update(text,'utf8','hex')
     crypted += cipher.final('hex');
     return crypted;
   }
 
-  function decrypt(password, text){
+  function decrypt(text){
     var decipher = crypto.createDecipher(algorithm,password)
     var dec = decipher.update(text,'hex','utf8')
     dec += decipher.final('utf8');
