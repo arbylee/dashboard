@@ -12,11 +12,9 @@ class BoaBalance extends Component {
   }
 
   componentDidMount() {
-    console.log("mount");
     var _this = this;
     this.serverRequest = axios.get('/boa-balance')
       .then(function(response) {
-        console.log(response);
         _this.setState({
           balance: response.data.balance,
           date: response.data.date,
