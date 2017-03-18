@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Tile from './Tile.js';
-import axios from 'axios';
+import axios from './util/axios-instance';
 
 class BoaBalance extends Component {
   constructor(props) {
@@ -13,7 +13,7 @@ class BoaBalance extends Component {
 
   componentDidMount() {
     var _this = this;
-    this.serverRequest = axios.get('/boa-balance')
+    this.serverRequest = axios.get('boa-balance')
       .then(function(response) {
         _this.setState({
           balance: response.data.balance,
