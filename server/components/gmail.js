@@ -16,6 +16,7 @@ var setup = function(app, apiSecretsManager, tokenSecretsManager) {
 
   var url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
+    //approval_prompt: 'force', Refresh tokens are only given on the first API call unless you forcibly reprompt for one
     scope: scopes,
   });
 
