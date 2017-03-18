@@ -83,6 +83,9 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
       q: req.query.q,
     }
     gmail.users.messages.list(params, function(err, listResponse) {
+      if (err) {
+        return res.send(err);
+      }
       res.send(listResponse);
     })
   })
@@ -93,6 +96,9 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
       labelIds: 'Label_70',
     }
     gmail.users.messages.list(params, function(err, listResponse) {
+      if (err) {
+        return res.send(err);
+      }
       var messages = listResponse.messages;
       var getParams = {
         id: messages[0].id,
@@ -100,6 +106,9 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
       }
 
       gmail.users.messages.get(getParams, function(err, getResponse) {
+        if (err) {
+          return res.send(err);
+        }
         var balanceRegexp = new RegExp('Balance: \\\$ (.*) Account:')
         var balanceMatch = getResponse.snippet.match(balanceRegexp);
 
@@ -121,6 +130,9 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
     }
 
     gmail.users.messages.get(params, function(err, response) {
+      if (err) {
+        return res.send(err);
+      }
       res.send(response);
     })
   })
@@ -130,6 +142,9 @@ prompt.get({properties: {password: {hidden: true}}}, function(err, result) {
       userId: 'me'
     }
     gmail.users.labels.list(params, function(err, response) {
+      if (err) {
+        return res.send(err);
+      }
       res.send(response);
     })
   })
