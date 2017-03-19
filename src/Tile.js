@@ -3,9 +3,12 @@ import './Tile.css';
 
 class Tile extends Component {
   render() {
-    var data;
     return (
-      <div>{this.props.main}</div>
+      <div>
+        <h2>{this.props.header}</h2>
+        <div>{this.props.mainContent}</div>
+        <div>{this.props.footer}</div>
+      </div>
     )
   }
 }

@@ -25,7 +25,7 @@ class BoaBalance extends Component {
   render() {
     return (
       <div className="boa-balance">
-        <Tile main={this.state.balance} />
+        <Tile header="BoA Balance" mainContent={this.state.balance} footer={this.state.date}/>
       </div>
     );
   }
